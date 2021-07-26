@@ -1,0 +1,10 @@
+name: BlueMapFloodgate
+version: ${project.version}
+main: net.mctechnic.bluemapfloodgate.main
+api-version: 1.17
+depend:
+  - BlueMap
+  - floodgate
+author: TechnicJelle
+description: ${project.description}
+website: ${project.url}
