@@ -22,10 +22,13 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Calendar;
 
 public final class main extends JavaPlugin implements Listener {
 
 	FloodgateApi floodgateApi;
+	String playerheadsDirectory = "bluemap/web/assets/playerheads/";
+	boolean verboseUpdateMessages = true; //TODO: Config
 
 	@Override
 	public void onEnable() {
@@ -36,10 +39,7 @@ public final class main extends JavaPlugin implements Listener {
 			getLogger().info("floodgate API ready!");
 		}
 
-		BlueMapAPI.onEnable(blueMapAPI -> {
-			getLogger().info("BlueMap API ready!");
-			getLogger().info("yep yep");
-		});
+		BlueMapAPI.onEnable(blueMapAPI -> getLogger().info("BlueMap API ready!"));
 
 		getServer().getPluginManager().registerEvents(this, this);
 	}
@@ -49,11 +49,29 @@ public final class main extends JavaPlugin implements Listener {
 		// Plugin shutdown logic
 	}
 
+	void verboseLog(String message) {
+		if(verboseUpdateMessages) getLogger().info(message);
+	}
+
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
 		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
 			Player p = e.getPlayer();
 			if (floodgateApi.isFloodgatePlayer(p.getUniqueId())) {
+				File cacheFile = new File(playerheadsDirectory + p.getUniqueId() + ".cache");
+				if (cacheFile.exists()) {
+					long lastModified = cacheFile.lastModified(); //long value representing the time the file was last modified, measured in milliseconds since the epoch (00:00:00 GMT, January 1, 1970)
+					Calendar currentDate = Calendar.getInstance();
+					long dateNow = currentDate.getTimeInMillis();
+					if (dateNow < lastModified + 1000 * 60 * 60 * 24 * 3) { //three days //TODO: Config
+						verboseLog("Head for " + p.getUniqueId() + " already cached");
+						return;
+					} else {
+						verboseLog("Cache file for " + p.getUniqueId() + " outdated");
+					}
+				}
+
+				verboseLog("Grabbing head for " + p.getUniqueId());
 				FloodgatePlayer floodgatePlayer = floodgateApi.getPlayer(p.getUniqueId());
 				String xuid = floodgatePlayer.getXuid();
 				String textureID = getTextureID(xuid);
@@ -61,7 +79,24 @@ public final class main extends JavaPlugin implements Listener {
 				if (skin != null) {
 					BufferedImage head = skin.getSubimage(8, 8, 8, 8);
 					try {
-						ImageIO.write(head, "png", new File("bluemap/web/assets/playerheads/" + p.getUniqueId() + ".png")); //TODO: webroot
+						ImageIO.write(head, "png", new File(playerheadsDirectory + p.getUniqueId() + ".png")); //TODO: webroot
+
+						try {
+							if (cacheFile.createNewFile()) {
+								verboseLog("Cache file created: " + cacheFile.getName());
+							} else {
+								verboseLog("Cache file already exists (It's probably outdated)");
+								Calendar currentDate = Calendar.getInstance();
+								long dateNow = currentDate.getTimeInMillis();
+								if (cacheFile.setLastModified(dateNow)) {
+									verboseLog("Cache file updated");
+								} else {
+									getLogger().warning("Cache file wasn't updated. This should never happen");
+								}
+							}
+						} catch (IOException ioException) {
+							ioException.printStackTrace();
+						}
 					} catch (IOException ioException) {
 						ioException.printStackTrace();
 					}
