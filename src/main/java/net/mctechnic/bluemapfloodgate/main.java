@@ -111,45 +111,4 @@ public final class main extends JavaPlugin implements Listener {
 		}
 		return result;
 	}
-
-	BufferedImage getBImgFromURL(String uuid) {
-		BufferedImage result;
-		try {
-			URL imageUrl = new URL("https://crafatar.com/avatars/" + uuid + ".png?size=8&overlay=true"); //TODO: get from config later on
-			try {
-				InputStream in = imageUrl.openStream();
-				result = ImageIO.read(in);
-				in.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-				return null;
-			}
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-			return null;
-		}
-		return result;
-	}
-
-	String name2UUID(String name) {
-		URL url;
-		try {
-			url = new URL("https://api.mojang.com/users/profiles/minecraft/" + name);
-			try {
-				URLConnection request = url.openConnection();
-				request.connect();
-
-				// Convert to a JSON object to print data
-				JsonParser jp = new JsonParser(); //from gson
-				JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent())); //Convert the input stream to a json element
-				JsonObject rootObj = root.getAsJsonObject(); //This may be an array, or it may be an object.
-				return rootObj.get("id").getAsString();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 }
