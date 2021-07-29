@@ -55,8 +55,11 @@ public final class main extends JavaPlugin implements Listener {
 			Player p = e.getPlayer();
 			if (floodgateApi.isFloodgatePlayer(p.getUniqueId())) {
 				FloodgatePlayer floodgatePlayer = floodgateApi.getPlayer(p.getUniqueId());
-				BufferedImage head = getBImgFromURL(name2UUID(floodgatePlayer.getUsername()));
-				if (head != null) {
+				String xuid = floodgatePlayer.getXuid();
+				String textureID = getTextureID(xuid);
+				BufferedImage skin = getSkinFromID(textureID);
+				if (skin != null) {
+					BufferedImage head = skin.getSubimage(8, 8, 8, 8);
 					try {
 						ImageIO.write(head, "png", new File("bluemap/web/assets/playerheads/" + p.getUniqueId() + ".png")); //TODO: webroot
 					} catch (IOException ioException) {
@@ -65,6 +68,48 @@ public final class main extends JavaPlugin implements Listener {
 				}
 			}
 		});
+	}
+
+	String getTextureID(String xuid) {
+		URL url;
+		try {
+			url = new URL("https://api.geysermc.org/v1/skin/" + xuid);
+			try {
+				URLConnection request = url.openConnection();
+				request.connect();
+
+				// Convert to a JSON object to print data
+				JsonParser jp = new JsonParser(); //from gson
+				JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent())); //Convert the input stream to a json element
+				JsonObject rootObj = root.getAsJsonObject(); //This may be an array, or it may be an object.
+				JsonObject data = rootObj.getAsJsonObject("data");
+				return data.get("texture_id").getAsString();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	BufferedImage getSkinFromID(String textureID) {
+		BufferedImage result;
+		try {
+			URL imageUrl = new URL("http://textures.minecraft.net/texture/" + textureID);
+			try {
+				InputStream in = imageUrl.openStream();
+				result = ImageIO.read(in);
+				in.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			}
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+			return null;
+		}
+		return result;
 	}
 
 	BufferedImage getBImgFromURL(String uuid) {
@@ -97,7 +142,7 @@ public final class main extends JavaPlugin implements Listener {
 				// Convert to a JSON object to print data
 				JsonParser jp = new JsonParser(); //from gson
 				JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent())); //Convert the input stream to a json element
-				JsonObject rootObj = root.getAsJsonObject(); //May be an array, may be an object.
+				JsonObject rootObj = root.getAsJsonObject(); //This may be an array, or it may be an object.
 				return rootObj.get("id").getAsString();
 			} catch (IOException e) {
 				e.printStackTrace();
