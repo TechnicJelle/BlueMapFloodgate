@@ -1,6 +1,9 @@
 # BlueMap Floodgate
 A Minecraft Paper plugin and [BlueMap](https://github.com/BlueMap-Minecraft/BlueMap) addon that adds https://github.com/GeyserMC/Floodgate support
 
+You can safely reload the config by reloading this plugin with [PlugManX](https://www.spigotmc.org/resources/plugmanx.88135/).\
+(I do not recommend using it for other plugins! Plugin reloaders like this can seriously mess up some plugins)
+
 ## [Click here to download!](../../releases/latest)
 
 ## [TODO list](../../projects/1?fullscreen=true)

@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.bluecolored.bluemap.api.BlueMapAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -26,13 +27,24 @@ import java.util.Calendar;
 
 public final class main extends JavaPlugin implements Listener {
 
+
+	FileConfiguration config = getConfig();
+	boolean verboseUpdateMessages = true;
+	long cacheHours = 3 * 24; //three days by default
+
 	FloodgateApi floodgateApi;
 	String playerheadsDirectory = "bluemap/web/assets/playerheads/";
-	boolean verboseUpdateMessages = true; //TODO: Config
 
 	@Override
 	public void onEnable() {
 		// Plugin startup logic
+		config.addDefault("verboseUpdateMessages", true);
+		config.addDefault("cacheHours", 72);
+		config.options().copyDefaults(true);
+		saveConfig();
+
+		verboseUpdateMessages = config.getBoolean("verboseUpdateMessages");
+		cacheHours = config.getInt("cacheHours");
 
 		if (Bukkit.getPluginManager().getPlugin("floodgate") != null) {
 			floodgateApi = FloodgateApi.getInstance();
@@ -63,7 +75,7 @@ public final class main extends JavaPlugin implements Listener {
 					long lastModified = cacheFile.lastModified(); //long value representing the time the file was last modified, measured in milliseconds since the epoch (00:00:00 GMT, January 1, 1970)
 					Calendar currentDate = Calendar.getInstance();
 					long dateNow = currentDate.getTimeInMillis();
-					if (dateNow < lastModified + 1000 * 60 * 60 * 24 * 3) { //three days //TODO: Config
+					if (dateNow < lastModified + 1000 * 60 * 60 * cacheHours) { //three days
 						verboseLog("Head for " + p.getUniqueId() + " already cached");
 						return;
 					} else {
@@ -71,7 +83,7 @@ public final class main extends JavaPlugin implements Listener {
 					}
 				}
 
-				verboseLog("Grabbing head for " + p.getUniqueId());
+				getLogger().info("Grabbing head for " + p.getUniqueId());
 				FloodgatePlayer floodgatePlayer = floodgateApi.getPlayer(p.getUniqueId());
 				String xuid = floodgatePlayer.getXuid();
 				String textureID = getTextureID(xuid);
