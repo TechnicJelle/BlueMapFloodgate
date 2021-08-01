@@ -26,13 +26,41 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Calendar;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Consumer;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public final class main extends JavaPlugin implements Listener {
 
+	private static class CachedPlayer {
+		UUID uuid;
+		String xuid;
+
+		CachedPlayer(UUID _uuid, String _xuid) {
+			uuid = _uuid;
+			xuid = _xuid;
+		}
+
+		//Two functions to assist the Set<CachedPlayer> in knowing if a CachedPlayer is already in the set
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this)
+				return true;
+			if (!(obj instanceof CachedPlayer in))
+				return false;
+			boolean resultUUID = uuid.equals(in.uuid);
+			boolean resultXUID = Objects.equals(xuid, in.xuid);
+//			verboseLog(uuid + ":" + in.uuid + " & " + xuid + ":" + in.xuid + "==>" + resultUUID + resultXUID);
+			return resultUUID && resultXUID;
+		}
+
+		@Override
+		public int hashCode() {
+//			verboseLog(uuid + xuid + "==>" + (uuid.toString() + xuid).hashCode());
+			return (uuid.toString() + xuid).hashCode();
+		}
+	}
 
 	FileConfiguration config = getConfig();
 	boolean verboseUpdateMessages = true;
@@ -42,6 +70,8 @@ public final class main extends JavaPlugin implements Listener {
 	String blueMapPlayerheadsDirectory;
 	File ownPlayerheadsDirectory;
 
+	Set<CachedPlayer> playersToProcess;
+
 	@Override
 	public void onEnable() {
 		// Plugin startup logic
@@ -50,30 +80,69 @@ public final class main extends JavaPlugin implements Listener {
 		config.options().copyDefaults(true);
 		saveConfig();
 
+		playersToProcess = new HashSet<>();
+
 		verboseUpdateMessages = config.getBoolean("verboseUpdateMessages");
 		cacheHours = config.getInt("cacheHours");
+
+		ownPlayerheadsDirectory = new File(getDataFolder() + "/playerheads");
+		if (ownPlayerheadsDirectory.mkdir()) {
+			verboseLog(ownPlayerheadsDirectory.toString() + " directory made");
+		}
 
 		if (Bukkit.getPluginManager().getPlugin("floodgate") != null) {
 			floodgateApi = FloodgateApi.getInstance();
 			getLogger().info("floodgate API ready!");
 		}
 
-		BlueMapAPI.onEnable(blueMapAPI -> {
-			getLogger().info("BlueMap API ready!");
-			blueMapPlayerheadsDirectory = "bluemap/web/assets/playerheads/"; //TODO: webroot
-		});
+		BlueMapAPI.onEnable(blueMapOnEnableListener);
 
-		ownPlayerheadsDirectory = new File(getDataFolder() + "/playerheads");
-		if(ownPlayerheadsDirectory.mkdir()){
-			verboseLog(ownPlayerheadsDirectory.toString() + " directory made");
-		}
+		BlueMapAPI.onDisable(blueMapOnDisableListener);
 
 		getServer().getPluginManager().registerEvents(this, this);
+		getLogger().info("BlueMap Floodgate compatibility plugin enabled!");
 	}
+
+	Consumer<BlueMapAPI> blueMapOnEnableListener = blueMapAPI -> {
+		blueMapPlayerheadsDirectory = "bluemap/web/assets/playerheads/"; //TODO: webroot
+		getLogger().info("BlueMap API ready!");
+
+		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+//			verboseLog(">async");
+			if (playersToProcess != null) {
+//				verboseLog(">not null");
+				for (CachedPlayer cachedPlayer : playersToProcess) {
+					floodgateJoin(cachedPlayer);
+				}
+				playersToProcess = null;
+			} else {
+				getLogger().warning(">null (please tell me if this ever happens!)");
+				for (Player p : Bukkit.getOnlinePlayers()) {
+					if (floodgateApi.isFloodgatePlayer(p.getUniqueId())) {
+						FloodgatePlayer floodgatePlayer = floodgateApi.getPlayer(p.getUniqueId());
+						String xuid = floodgatePlayer.getXuid();
+						CachedPlayer cachedPlayer = new CachedPlayer(p.getUniqueId(), xuid);
+						floodgateJoin(cachedPlayer);
+					}
+				}
+			}
+		});
+	};
+
+	Consumer<BlueMapAPI> blueMapOnDisableListener = blueMapAPI -> {
+		blueMapPlayerheadsDirectory = null;
+		playersToProcess = new HashSet<>();
+		getLogger().info("BlueMap API Shutting down!");
+	};
 
 	@Override
 	public void onDisable() {
-		// Plugin shutdown logic
+		BlueMapAPI.unregisterListener(blueMapOnEnableListener);
+		BlueMapAPI.unregisterListener(blueMapOnDisableListener);
+
+		playersToProcess = null;
+
+		getLogger().info("BlueMap Floodgate compatibility plugin disabled!");
 	}
 
 	private void verboseLog(String message) {
@@ -85,36 +154,38 @@ public final class main extends JavaPlugin implements Listener {
 		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
 			Player p = e.getPlayer();
 			if (floodgateApi.isFloodgatePlayer(p.getUniqueId())) {
-				floodgateJoin(p);
+				FloodgatePlayer floodgatePlayer = floodgateApi.getPlayer(p.getUniqueId());
+				String xuid = floodgatePlayer.getXuid();
+				CachedPlayer cachedPlayer = new CachedPlayer(p.getUniqueId(), xuid);
+
+				BlueMapAPI.getInstance().ifPresentOrElse(api -> { //BlueMap IS currently loaded
+					floodgateJoin(cachedPlayer);
+				}, () -> { //BlueMap is currently NOT loaded
+					if (playersToProcess != null) {
+						if (playersToProcess.add(cachedPlayer)) {
+							verboseLog("Added " + p.getUniqueId() + " to processing queue");
+						} else {
+							verboseLog("Player " + p.getUniqueId() + " was already in the processing queue");
+						}
+					} else {
+						getLogger().warning("playersToProcess was null. This should never happen");
+					}
+				});
 			}
 		});
 	}
 
-	private void getHeadToOwnFolder(UUID uuid, File f) {
-		FloodgatePlayer floodgatePlayer = floodgateApi.getPlayer(uuid);
-		String xuid = floodgatePlayer.getXuid();
-		String textureID = getTextureID(xuid);
-		BufferedImage skin = getSkinFromID(textureID);
-		if (skin != null) {
-			BufferedImage head = skin.getSubimage(8, 8, 8, 8);
-			try {
-				ImageIO.write(head, "png", f);
-				verboseLog(f +  " saved");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	private void floodgateJoin(Player p) {
-		File ownHeadFile = new File(ownPlayerheadsDirectory + "/" + p.getUniqueId() + ".png");
+	private void floodgateJoin(CachedPlayer cachedPlayer) {
+		UUID uuid = cachedPlayer.uuid;
+		String xuid = cachedPlayer.xuid;
+		File ownHeadFile = new File(ownPlayerheadsDirectory + "/" + uuid + ".png");
 		if (ownHeadFile.exists()) {
 			long lastModified = ownHeadFile.lastModified(); //long value representing the time the file was last modified, measured in milliseconds since the epoch (00:00:00 GMT, January 1, 1970)
 			Calendar currentDate = Calendar.getInstance();
 			long dateNow = currentDate.getTimeInMillis();
 			if (dateNow > lastModified + 1000 * 60 * 60 * cacheHours) {
-				verboseLog("Cache for " + p.getUniqueId() + " outdated");
-				getHeadToOwnFolder(p.getUniqueId(), ownHeadFile);
+				verboseLog("Cache for " + uuid + " outdated");
+				getHeadToOwnFolder(xuid, ownHeadFile);
 
 				if (ownHeadFile.setLastModified(dateNow)) {
 					verboseLog(" Cache updated");
@@ -123,10 +194,10 @@ public final class main extends JavaPlugin implements Listener {
 				}
 
 			} else {
-				verboseLog("Head for " + p.getUniqueId() + " already cached");
+				verboseLog("Head for " + uuid + " already cached");
 			}
 		} else {
-			getHeadToOwnFolder(p.getUniqueId(), ownHeadFile);
+			getHeadToOwnFolder(xuid, ownHeadFile);
 		}
 
 		verboseLog("Overwriting BlueMap's head with floodgate head");
@@ -137,6 +208,20 @@ public final class main extends JavaPlugin implements Listener {
 //			verboseLog("BlueMap file overwritten!");
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void getHeadToOwnFolder(String xuid, File f) {
+		String textureID = getTextureID(xuid);
+		BufferedImage skin = getSkinFromID(textureID);
+		if (skin != null) {
+			BufferedImage head = skin.getSubimage(8, 8, 8, 8);
+			try {
+				ImageIO.write(head, "png", f);
+				verboseLog(f + " saved");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

@@ -6,7 +6,7 @@
 
     <groupId>net.mctechnic</groupId>
     <artifactId>BlueMapFloodgate</artifactId>
-    <version>1.3.2-BETA</version>
+    <version>1.3.3-BETA</version>
     <packaging>jar</packaging>
 
     <name>BlueMapFloodgate</name>
