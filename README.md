@@ -4,6 +4,13 @@ A Minecraft Paper plugin and [BlueMap](https://github.com/BlueMap-Minecraft/Blue
 You can safely reload the config by reloading this plugin with [PlugManX](https://www.spigotmc.org/resources/plugmanx.88135/).\
 (I do not recommend using it for other plugins! Plugin reloaders like this can seriously mess up some plugins)
 
+### Config
+- `verboseUpdateMessages: true`
+  - Set to `true` you want more messages telling you what the plugin is up to.
+
+- `cacheHours: 72`
+  - How long to keep the playerheads cached for. The lower this number, the faster skin updates will appear, but the more network usage there will be.
+
 ## [Click here to download!](../../releases/latest)
 
 ## [TODO list](../../projects/1?fullscreen=true)
