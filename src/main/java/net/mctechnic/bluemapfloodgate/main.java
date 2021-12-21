@@ -185,7 +185,7 @@ public final class main extends JavaPlugin implements Listener {
 			long dateNow = currentDate.getTimeInMillis();
 			if (dateNow > lastModified + 1000 * 60 * 60 * cacheHours) {
 				verboseLog("Cache for " + uuid + " outdated");
-				getHeadToOwnFolder(xuid, ownHeadFile);
+				getHeadToOwnDirectory(xuid, ownHeadFile);
 
 				if (ownHeadFile.setLastModified(dateNow)) {
 					verboseLog(" Cache updated");
@@ -197,21 +197,22 @@ public final class main extends JavaPlugin implements Listener {
 				verboseLog("Head for " + uuid + " already cached");
 			}
 		} else {
-			getHeadToOwnFolder(xuid, ownHeadFile);
+			getHeadToOwnDirectory(xuid, ownHeadFile);
 		}
 
-		verboseLog("Overwriting BlueMap's head with floodgate head");
+		verboseLog("Overwriting BlueMap's head with floodgate's head");
 
 		Path destination = Paths.get(blueMapPlayerheadsDirectory, ownHeadFile.getName());
 		try {
 			Files.copy(ownHeadFile.toPath(), destination, REPLACE_EXISTING);
 //			verboseLog("BlueMap file overwritten!");
 		} catch (IOException e) {
+			getLogger().warning("Failed to copy the head image file from own directory to BlueMap's directory");
 			e.printStackTrace();
 		}
 	}
 
-	private void getHeadToOwnFolder(String xuid, File f) {
+	private void getHeadToOwnDirectory(String xuid, File f) {
 		String textureID = getTextureID(xuid);
 		BufferedImage skin = getSkinFromID(textureID);
 		if (skin != null) {
@@ -220,6 +221,7 @@ public final class main extends JavaPlugin implements Listener {
 				ImageIO.write(head, "png", f);
 				verboseLog(f + " saved");
 			} catch (IOException e) {
+				getLogger().warning("Failed to write the head image file to own directory");
 				e.printStackTrace();
 			}
 		}
@@ -240,6 +242,7 @@ public final class main extends JavaPlugin implements Listener {
 				// JsonObject data = rootObj.getAsJsonObject("data"); // The data object in the JSON was removed in v2 of GeyserMC's API.
 				return rootObj.get("texture_id").getAsString();
 			} catch (IOException e) {
+				getLogger().warning("Failed to get the textureID");
 				e.printStackTrace();
 			}
 		} catch (MalformedURLException e) {
@@ -251,12 +254,13 @@ public final class main extends JavaPlugin implements Listener {
 	private BufferedImage getSkinFromID(String textureID) {
 		BufferedImage result;
 		try {
-			URL imageUrl = new URL("http://textures.minecraft.net/texture/" + textureID);
+			URL imageUrl = new URL("https://textures.minecraft.net/texture/" + textureID);
 			try {
 				InputStream in = imageUrl.openStream();
 				result = ImageIO.read(in);
 				in.close();
 			} catch (IOException e) {
+				getLogger().warning("Failed to get the skin image");
 				e.printStackTrace();
 				return null;
 			}
