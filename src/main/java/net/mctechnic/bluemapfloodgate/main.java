@@ -104,7 +104,7 @@ public final class main extends JavaPlugin implements Listener {
 	}
 
 	Consumer<BlueMapAPI> blueMapOnEnableListener = blueMapAPI -> {
-		blueMapPlayerheadsDirectory = "bluemap/web/assets/playerheads/"; //TODO: webroot
+		blueMapPlayerheadsDirectory = blueMapAPI.getWebRoot() + "/assets/playerheads/";
 		getLogger().info("BlueMap API ready!");
 
 		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
