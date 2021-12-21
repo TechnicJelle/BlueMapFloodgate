@@ -228,7 +228,7 @@ public final class main extends JavaPlugin implements Listener {
 	private String getTextureID(String xuid) {
 		URL url;
 		try {
-			url = new URL("https://api.geysermc.org/v1/skin/" + xuid);
+			url = new URL("https://api.geysermc.org/v2/skin/" + xuid);
 			try {
 				URLConnection request = url.openConnection();
 				request.connect();
@@ -237,8 +237,8 @@ public final class main extends JavaPlugin implements Listener {
 				JsonParser jp = new JsonParser(); //from gson
 				JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent())); //Convert the input stream to a json element
 				JsonObject rootObj = root.getAsJsonObject(); //This may be an array, or it may be an object.
-				JsonObject data = rootObj.getAsJsonObject("data");
-				return data.get("texture_id").getAsString();
+				// JsonObject data = rootObj.getAsJsonObject("data"); // The data object in the JSON was removed in v2 of GeyserMC's API.
+				return rootObj.get("texture_id").getAsString();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
