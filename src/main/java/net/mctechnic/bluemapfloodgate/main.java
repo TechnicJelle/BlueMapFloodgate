@@ -235,11 +235,8 @@ public final class main extends JavaPlugin implements Listener {
 				URLConnection request = url.openConnection();
 				request.connect();
 
-				// Convert to a JSON object to print data
-				JsonParser jp = new JsonParser(); //from gson
-				JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent())); //Convert the input stream to a json element
-				JsonObject rootObj = root.getAsJsonObject(); //This may be an array, or it may be an object.
-				// JsonObject data = rootObj.getAsJsonObject("data"); // The data object in the JSON was removed in v2 of GeyserMC's API.
+				JsonElement root = JsonParser.parseReader(new InputStreamReader((InputStream) request.getContent()));
+				JsonObject rootObj = root.getAsJsonObject();
 				return rootObj.get("texture_id").getAsString();
 			} catch (IOException e) {
 				getLogger().warning("Failed to get the textureID");
