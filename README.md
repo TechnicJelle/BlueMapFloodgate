@@ -1,4 +1,6 @@
 # BlueMap Floodgate
+[![GitHub Total Downloads](https://img.shields.io/github/downloads/TechnicJelle/BlueMapFloodgate/total?label=Downloads&color=success "Click here to download the plugin")](https://github.com/TechnicJelle/BlueMapFloodgate/releases/latest)
+
 A Minecraft Paper plugin and [BlueMap](https://github.com/BlueMap-Minecraft/BlueMap) addon that adds https://github.com/GeyserMC/Floodgate support
 
 You can safely reload the config by reloading this plugin with [PlugManX](https://www.spigotmc.org/resources/plugmanx.88135/).\
@@ -6,7 +8,7 @@ You can safely reload the config by reloading this plugin with [PlugManX](https:
 
 ### Config
 - `verboseUpdateMessages: true`
-  - Set to `true` you want more messages telling you what the plugin is up to.
+  - Set to `true` if you want more messages telling you what the plugin is up to.
 
 - `cacheHours: 72`
   - How long to keep the playerheads cached for. The lower this number, the faster skin updates will appear, but the more network usage there will be.
