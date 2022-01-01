@@ -214,9 +214,29 @@ public final class main extends JavaPlugin implements Listener {
 
 	private void getHeadToOwnDirectory(String xuid, File f) {
 		String textureID = getTextureID(xuid);
-		BufferedImage skin = getSkinFromID(textureID);
-		if (skin != null) {
-			BufferedImage head = skin.getSubimage(8, 8, 8, 8);
+		BufferedImage head = null;
+
+		if (textureID == null) {
+			getLogger().info("This player doesn't have a skin stored in Geyser's server (yet), defaulting to a Steve head");
+			try {
+				head = ImageIO.read(new File(new File(blueMapPlayerheadsDirectory).getParent() + "/steve.png")); //perhaps the worst line of code I've ever written D:
+			} catch (IOException e) {
+				getLogger().warning("Failed to load BlueMap's fallback steve.png!");
+				e.printStackTrace();
+				return;
+			}
+		} else {
+			BufferedImage skin = getSkinFromID(textureID);
+			if(skin == null) {
+				getLogger().warning("Skin was null!");
+			} else {
+				head = skin.getSubimage(8, 8, 8, 8);
+			}
+		}
+
+		if (head == null) {
+			getLogger().warning("Head was null!");
+		} else {
 			try {
 				ImageIO.write(head, "png", f);
 				verboseLog(f + " saved");
@@ -235,9 +255,16 @@ public final class main extends JavaPlugin implements Listener {
 				URLConnection request = url.openConnection();
 				request.connect();
 
-				JsonElement root = JsonParser.parseReader(new InputStreamReader((InputStream) request.getContent()));
-				JsonObject rootObj = root.getAsJsonObject();
-				return rootObj.get("texture_id").getAsString();
+				JsonObject joRoot = JsonParser.parseReader(new InputStreamReader((InputStream) request.getContent())).getAsJsonObject();
+				if (joRoot != null) {
+					JsonElement jeTextureID = joRoot.get("texture_id");
+					if (jeTextureID != null) {
+						String textureID = jeTextureID.getAsString();
+						if (textureID != null) {
+							return textureID;
+						}
+					}
+				}
 			} catch (IOException e) {
 				getLogger().warning("Failed to get the textureID");
 				e.printStackTrace();
