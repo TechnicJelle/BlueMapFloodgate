@@ -7,9 +7,12 @@ You can safely reload the config by reloading this plugin with [PlugManX](https:
 (I do not recommend using it for other plugins! Plugin reloaders like this can seriously mess up some plugins)
 
 ### Config
-- `verboseUpdateMessages: true`
+- `configVersion_DO_NOT_TOUCH`
+  - Do not touch this one! It's needed internally to keep track of the config versions.
+- `verboseLogging: true`
   - Set to `true` if you want more messages telling you what the plugin is up to.
-
+- `useTydiumCraftSkinAPI: true`
+  - Option to choose between using the [TydiumCraft Skin API](https://tydiumcraft.net/docs/skinapi) and my own custom implementation.
 - `cacheHours: 72`
   - How long to keep the playerheads cached for. The lower this number, the faster skin updates will appear, but the more network usage there will be.
 
