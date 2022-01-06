@@ -63,10 +63,17 @@ public final class main extends JavaPlugin implements Listener {
 	}
 
 	FileConfiguration config = getConfig();
-	final int configVersionGlobal = 2;
+	final int CONFIG_VERSION_GLOBAL = 2;
+	final String CONFIG_VERSION_KEY = "configVersion_DO_NOT_TOUCH";
+
 	boolean verboseLogging = true;
-	boolean useTydiumCraftSkinAPI = true;
+	final String VERBOSE_LOGGING_KEY = "verboseLogging";
+
+	boolean useTydiumCraftSkinAPI = false;
+	final String USE_TYDIUMCRAFT_SKIN_API_KEY = "useTydiumCraftSkinAPI";
+
 	long cacheHours = 3 * 24; //three days by default
+	final String CACHE_HOURS_KEY = "cacheHours";
 
 	FloodgateApi floodgateApi;
 	File blueMapPlayerheadsDirectory;
@@ -74,50 +81,63 @@ public final class main extends JavaPlugin implements Listener {
 
 	Set<CachedPlayer> playersToProcess;
 
+	private int loadConfig(boolean loadAll) {
+		int configVersionCurrent = config.getInt(CONFIG_VERSION_KEY);  //is 0 if the config file doesn't exist
+		if(loadAll) {
+			verboseLogging = config.getBoolean(VERBOSE_LOGGING_KEY);
+			useTydiumCraftSkinAPI = config.getBoolean(USE_TYDIUMCRAFT_SKIN_API_KEY);
+			cacheHours = config.getInt(CACHE_HOURS_KEY);
+		}
+		return configVersionCurrent;
+	}
+
 	@Override
 	public void onEnable() {
 		// Plugin startup logic
 
 		//Config
-		config.addDefault("configVersion_DO_NOT_TOUCH", configVersionGlobal);
-		config.addDefault("verboseLogging", verboseLogging);
-		config.addDefault("useTydiumCraftSkinAPI", useTydiumCraftSkinAPI);
-		config.addDefault("cacheHours", cacheHours);
 
-		config.options().copyDefaults(true);
-		saveConfig();
+		int configVersionCurrent = loadConfig(false);
 
-		int configVersionCurrent = config.getInt("configVersion_DO_NOT_TOUCH");
-		verboseLogging = config.getBoolean("verboseLogging");
-		useTydiumCraftSkinAPI = config.getBoolean("useTydiumCraftSkinAPI");
-		cacheHours = config.getInt("cacheHours");
-
-		if(configVersionGlobal != configVersionCurrent || config.contains("verboseUpdateMessages")) { //use config.contains to check for all old config settings
-			getLogger().severe("Config is out of date, please delete the config file and restart your server to reset it!");
-		}
-
-		//Directory
-		ownPlayerheadsDirectory = new File(getDataFolder() + "/playerheads");
-		if (ownPlayerheadsDirectory.mkdir()) {
-			verboseLog(ownPlayerheadsDirectory.toString() + " directory made");
-		}
-
-		//floodgateAPI
-		if (Bukkit.getPluginManager().getPlugin("floodgate") != null) {
-			floodgateApi = FloodgateApi.getInstance();
-			getLogger().info("floodgate API ready!");
+		if(configVersionCurrent != 0 && configVersionCurrent != CONFIG_VERSION_GLOBAL ||
+				config.contains("verboseUpdateMessages")) //use config.contains to check for all old config settings
+		{
+			getLogger().severe("Config is out of date, please delete the config file and restart your server to reset it!\nShutting down the plugin...");
+			Bukkit.getPluginManager().disablePlugin(this);
 		} else {
-			getLogger().severe("floodgate could not be found!");
+			config.addDefault(CONFIG_VERSION_KEY, CONFIG_VERSION_GLOBAL);
+			config.addDefault(VERBOSE_LOGGING_KEY, verboseLogging);
+			config.addDefault(USE_TYDIUMCRAFT_SKIN_API_KEY, useTydiumCraftSkinAPI);
+			config.addDefault(CACHE_HOURS_KEY, cacheHours);
+
+			config.options().copyDefaults(true);
+			saveConfig();
+
+			loadConfig(true);
+
+			//Directory
+			ownPlayerheadsDirectory = new File(getDataFolder() + "/playerheads");
+			if (ownPlayerheadsDirectory.mkdir()) {
+				verboseLog(ownPlayerheadsDirectory.toString() + " directory made");
+			}
+
+			//floodgateAPI
+			if (Bukkit.getPluginManager().getPlugin("floodgate") != null) {
+				floodgateApi = FloodgateApi.getInstance();
+				getLogger().info("floodgate API ready!");
+			} else {
+				getLogger().severe("floodgate could not be found!");
+			}
+
+			playersToProcess = new HashSet<>();
+
+			BlueMapAPI.onEnable(blueMapOnEnableListener);
+
+			BlueMapAPI.onDisable(blueMapOnDisableListener);
+
+			getServer().getPluginManager().registerEvents(this, this);
+			getLogger().info("BlueMap Floodgate compatibility plugin enabled!");
 		}
-
-		playersToProcess = new HashSet<>();
-
-		BlueMapAPI.onEnable(blueMapOnEnableListener);
-
-		BlueMapAPI.onDisable(blueMapOnDisableListener);
-
-		getServer().getPluginManager().registerEvents(this, this);
-		getLogger().info("BlueMap Floodgate compatibility plugin enabled!");
 	}
 
 	Consumer<BlueMapAPI> blueMapOnEnableListener = blueMapAPI -> {
