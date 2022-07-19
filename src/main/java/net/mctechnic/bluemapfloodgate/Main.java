@@ -31,7 +31,7 @@ import java.util.function.Consumer;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
-public final class main extends JavaPlugin implements Listener {
+public final class Main extends JavaPlugin implements Listener {
 
 	private static class CachedPlayer {
 		UUID uuid;
@@ -256,7 +256,7 @@ public final class main extends JavaPlugin implements Listener {
 
 		if (useTydiumCraftSkinAPI) {
 			verboseLog("Getting " + cachedPlayer.uuid + "'s skin from TydiumCraft's Skin API");
-			skin = imageFromURL("https://api.tydiumcraft.net/skin?type=skin&download&uuid=" + cachedPlayer.uuid);
+			skin = imageFromURL("https://api.tydiumcraft.net/players/skin?type=skin&download&uuid=" + cachedPlayer.uuid);
 		} else {
 			String textureID = textureIDFromXUID(cachedPlayer.xuid);
 			skin = skinFromTextureID(textureID);
