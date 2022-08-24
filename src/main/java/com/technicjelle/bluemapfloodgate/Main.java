@@ -238,16 +238,18 @@ public final class Main extends JavaPlugin implements Listener {
 			downloadHeadToCache(cachedPlayer, ownHeadFile);
 		}
 
-		verboseLog("Overwriting BlueMap's head with floodgate's head");
 
 		Path destination = Paths.get(blueMapPlayerheadsDirectory.toString(), ownHeadFile.getName());
-		try {
-			Files.copy(ownHeadFile.toPath(), destination, StandardCopyOption.REPLACE_EXISTING);
-//			verboseLog("BlueMap file overwritten!");
-		} catch (IOException e) {
-			getLogger().warning("Failed to copy the head image file from own directory to BlueMap's directory");
-			e.printStackTrace();
-		}
+		Bukkit.getScheduler().runTaskLater(this, () -> {
+			verboseLog("Overwriting BlueMap's head with floodgate's head");
+			try {
+				Files.copy(ownHeadFile.toPath(), destination, StandardCopyOption.REPLACE_EXISTING);
+				verboseLog("BlueMap file overwritten!");
+			} catch (IOException e) {
+				getLogger().warning("Failed to copy the head image file from own directory to BlueMap's directory");
+				e.printStackTrace();
+			}
+		}, 30);
 	}
 
 	private void downloadHeadToCache(CachedPlayer cachedPlayer, File f) {
