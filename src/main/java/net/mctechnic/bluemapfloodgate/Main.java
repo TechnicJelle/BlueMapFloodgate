@@ -26,10 +26,9 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.function.Consumer;
-
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public final class Main extends JavaPlugin implements Listener {
 
@@ -141,7 +140,7 @@ public final class Main extends JavaPlugin implements Listener {
 	}
 
 	Consumer<BlueMapAPI> blueMapOnEnableListener = blueMapAPI -> {
-		blueMapPlayerheadsDirectory = new File(blueMapAPI.getWebRoot() + "/assets/playerheads/");
+		blueMapPlayerheadsDirectory = new File(blueMapAPI.getWebApp().getWebRoot() + "/assets/playerheads/");
 		getLogger().info("BlueMap API ready!");
 
 		Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
@@ -243,7 +242,7 @@ public final class Main extends JavaPlugin implements Listener {
 
 		Path destination = Paths.get(blueMapPlayerheadsDirectory.toString(), ownHeadFile.getName());
 		try {
-			Files.copy(ownHeadFile.toPath(), destination, REPLACE_EXISTING);
+			Files.copy(ownHeadFile.toPath(), destination, StandardCopyOption.REPLACE_EXISTING);
 //			verboseLog("BlueMap file overwritten!");
 		} catch (IOException e) {
 			getLogger().warning("Failed to copy the head image file from own directory to BlueMap's directory");
@@ -256,7 +255,7 @@ public final class Main extends JavaPlugin implements Listener {
 
 		if (useTydiumCraftSkinAPI) {
 			verboseLog("Getting " + cachedPlayer.uuid + "'s skin from TydiumCraft's Skin API");
-			skin = imageFromURL("https://api.tydiumcraft.net/players/skin?type=skin&download&uuid=" + cachedPlayer.uuid);
+			skin = imageFromURL("https://api.tydiumcraft.net/v1/players/skin?type=skin&uuid=" + cachedPlayer.uuid);
 		} else {
 			String textureID = textureIDFromXUID(cachedPlayer.xuid);
 			skin = skinFromTextureID(textureID);

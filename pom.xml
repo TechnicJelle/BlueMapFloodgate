@@ -6,7 +6,7 @@
 
 	<groupId>net.mctechnic</groupId>
 	<artifactId>BlueMapFloodgate</artifactId>
-	<version>1.4.2-BETA</version>
+	<version>1.4.3</version>
 	<packaging>jar</packaging>
 
 	<name>BlueMapFloodgate</name>
@@ -83,7 +83,7 @@
 		<dependency>
 			<groupId>com.github.BlueMap-Minecraft</groupId>
 			<artifactId>BlueMapAPI</artifactId>
-			<version>v1.7.0</version>
+			<version>v2.1.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
