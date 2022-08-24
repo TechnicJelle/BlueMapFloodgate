@@ -1,4 +1,4 @@
-package net.mctechnic.bluemapfloodgate;
+package com.technicjelle.bluemapfloodgate;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

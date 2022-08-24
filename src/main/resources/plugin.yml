@@ -1,6 +1,6 @@
 name: BlueMapFloodgate
 version: ${project.version}
-main: net.mctechnic.bluemapfloodgate.main
+main: com.technicjelle.bluemapfloodgate.Main
 api-version: 1.17
 depend:
   - BlueMap

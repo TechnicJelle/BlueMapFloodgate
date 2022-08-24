@@ -1,7 +1,12 @@
 # BlueMap Floodgate
 [![GitHub Total Downloads](https://img.shields.io/github/downloads/TechnicJelle/BlueMapFloodgate/total?label=Downloads&color=success "Click here to download the plugin")](https://github.com/TechnicJelle/BlueMapFloodgate/releases/latest)
 
-A Minecraft Paper plugin and [BlueMap](https://github.com/BlueMap-Minecraft/BlueMap) addon that adds https://github.com/GeyserMC/Floodgate support
+A Minecraft Paper plugin and [BlueMap](https://github.com/BlueMap-Minecraft/BlueMap) addon that adds [Geyser/Floodgate](https://github.com/GeyserMC/Floodgate) support:
+by default, floodgate players don't have the correct playerhead image on BlueMap. This plugin fixes that.
+
+| Without                                                  | With                                               |
+|----------------------------------------------------------|----------------------------------------------------|
+| ![without the plugin](.github/readme_assets/without.png) | ![with the plugin](.github/readme_assets/with.png) | 
 
 You can safely reload the config by reloading this plugin with [PlugManX](https://www.spigotmc.org/resources/plugmanx.88135/).\
 (I do not recommend using it for other plugins! Plugin reloaders like this can seriously mess up some plugins)
@@ -11,7 +16,7 @@ You can safely reload the config by reloading this plugin with [PlugManX](https:
   - Do not touch this one! It's needed internally to keep track of the config versions.
 - `verboseLogging: true`
   - Set to `true` if you want more messages telling you what the plugin is up to.
-- `useTydiumCraftSkinAPI: true`
+- `useTydiumCraftSkinAPI: false`
   - Option to choose between using the [TydiumCraft Skin API](https://tydiumcraft.net/docs/skinapi) and my own custom implementation.
 - `cacheHours: 72`
   - How long to keep the playerheads cached for. The lower this number, the faster skin updates will appear, but the more network usage there will be.
