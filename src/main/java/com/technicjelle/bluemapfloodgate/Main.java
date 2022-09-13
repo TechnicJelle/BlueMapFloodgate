@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.bluecolored.bluemap.api.BlueMapAPI;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -93,6 +94,8 @@ public final class Main extends JavaPlugin implements Listener {
 	@Override
 	public void onEnable() {
 		// Plugin startup logic
+
+		Metrics metrics = new Metrics(this, 16426);
 
 		//Config
 
