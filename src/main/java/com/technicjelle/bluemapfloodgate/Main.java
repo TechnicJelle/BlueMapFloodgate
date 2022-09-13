@@ -47,8 +47,9 @@ public final class Main extends JavaPlugin implements Listener {
 		public boolean equals(Object obj) {
 			if (obj == this)
 				return true;
-			if (!(obj instanceof CachedPlayer in))
+			if (!(obj instanceof CachedPlayer))
 				return false;
+			CachedPlayer in = (CachedPlayer) obj;
 			boolean resultUUID = uuid.equals(in.uuid);
 			boolean resultXUID = Objects.equals(xuid, in.xuid);
 //			verboseLog(uuid + ":" + in.uuid + " & " + xuid + ":" + in.xuid + "==>" + resultUUID + resultXUID);

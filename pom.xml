@@ -13,7 +13,7 @@
 
 	<description>A Minecraft Paper plugin and BlueMap addon that adds GeyserMC/floodgate support</description>
 	<properties>
-		<java.version>16</java.version>
+		<java.version>11</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<url>https://github.com/TechnicJelle/BlueMapFloodgate</url>
@@ -37,7 +37,7 @@
 					<relocations>
 						<relocation>
 							<pattern>org.bstats</pattern>
-							<shadedPattern>com.technicjelle.bluemapofflineplayermarkers</shadedPattern>
+							<shadedPattern>com.technicjelle.bluemapfloodgate</shadedPattern>
 						</relocation>
 					</relocations>
 				</configuration>
