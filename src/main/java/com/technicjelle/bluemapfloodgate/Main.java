@@ -89,7 +89,7 @@ public final class Main extends JavaPlugin implements Listener {
 
 	private int loadConfig(boolean loadAll) {
 		int configVersionCurrent = config.getInt(CONFIG_VERSION_KEY);  //is 0 if the config file doesn't exist
-		if(loadAll) {
+		if (loadAll) {
 			verboseLogging = config.getBoolean(VERBOSE_LOGGING_KEY);
 			customAPI = config.getString(CUSTOM_API_KEY);
 			metrics.addCustomChart(new SimplePie("custom_api", () -> customAPI.isBlank() ? "Direct" : "Custom"));
@@ -104,11 +104,14 @@ public final class Main extends JavaPlugin implements Listener {
 
 		metrics = new Metrics(this, 16426);
 
+		BlueMapAPI.onEnable(blueMapOnEnableListener);
+		BlueMapAPI.onDisable(blueMapOnDisableListener);
+
 		//Config
 
 		int configVersionCurrent = loadConfig(false);
 
-		if(configVersionCurrent != 0 && configVersionCurrent != CONFIG_VERSION_GLOBAL
+		if (configVersionCurrent != 0 && configVersionCurrent != CONFIG_VERSION_GLOBAL
 				//use config.contains to check for all old config settings
 				|| config.contains("verboseUpdateMessages")
 				|| config.contains("useTydiumCraftSkinAPI")
@@ -116,39 +119,37 @@ public final class Main extends JavaPlugin implements Listener {
 		{
 			getLogger().severe("Config is out of date, please delete the config file and restart your server to reset it!\nShutting down the plugin...");
 			Bukkit.getPluginManager().disablePlugin(this);
-		} else {
-			config.addDefault(CONFIG_VERSION_KEY, CONFIG_VERSION_GLOBAL);
-			config.addDefault(VERBOSE_LOGGING_KEY, verboseLogging);
-			config.addDefault(CUSTOM_API_KEY, customAPI);
-			config.addDefault(CACHE_HOURS_KEY, cacheHours);
-
-			config.options().copyDefaults(true);
-			saveConfig();
-
-			loadConfig(true);
-
-			//Directory
-			ownPlayerheadsDirectory = new File(getDataFolder() + "/playerheads");
-			if (ownPlayerheadsDirectory.mkdir()) {
-				verboseLog(ownPlayerheadsDirectory.toString() + " directory made");
-			}
-
-			//floodgateAPI
-			if (Bukkit.getPluginManager().getPlugin("floodgate") != null) {
-				floodgateApi = FloodgateApi.getInstance();
-				getLogger().info("floodgate API ready!");
-			} else {
-				getLogger().severe("floodgate could not be found!");
-			}
-
-			playersToProcess = new HashSet<>();
-
-			BlueMapAPI.onEnable(blueMapOnEnableListener);
-			BlueMapAPI.onDisable(blueMapOnDisableListener);
-
-			getServer().getPluginManager().registerEvents(this, this);
-			getLogger().info("BlueMap Floodgate compatibility plugin enabled!");
+			return;
 		}
+
+		config.addDefault(CONFIG_VERSION_KEY, CONFIG_VERSION_GLOBAL);
+		config.addDefault(VERBOSE_LOGGING_KEY, verboseLogging);
+		config.addDefault(CUSTOM_API_KEY, customAPI);
+		config.addDefault(CACHE_HOURS_KEY, cacheHours);
+
+		config.options().copyDefaults(true);
+		saveConfig();
+
+		loadConfig(true);
+
+		//Directory
+		ownPlayerheadsDirectory = new File(getDataFolder() + "/playerheads");
+		if (ownPlayerheadsDirectory.mkdir()) {
+			verboseLog(ownPlayerheadsDirectory.toString() + " directory made");
+		}
+
+		//floodgateAPI
+		if (Bukkit.getPluginManager().getPlugin("floodgate") != null) {
+			floodgateApi = FloodgateApi.getInstance();
+			getLogger().info("floodgate API ready!");
+		} else {
+			getLogger().severe("floodgate could not be found!");
+		}
+
+		playersToProcess = new HashSet<>();
+
+		getServer().getPluginManager().registerEvents(this, this);
+		getLogger().info("BlueMap Floodgate compatibility plugin enabled!");
 	}
 
 	Consumer<BlueMapAPI> blueMapOnEnableListener = blueMapAPI -> {
