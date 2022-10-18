@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.bluecolored.bluemap.api.BlueMapAPI;
 import org.bstats.bukkit.Metrics;
+import org.bstats.charts.SimplePie;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -36,10 +37,12 @@ public final class Main extends JavaPlugin implements Listener {
 	private static class CachedPlayer {
 		UUID uuid;
 		String xuid;
+		String name;
 
-		CachedPlayer(UUID _uuid, String _xuid) {
+		CachedPlayer(UUID _uuid, String _xuid, String _name) {
 			uuid = _uuid;
 			xuid = _xuid;
+			name = _name;
 		}
 
 		//Two functions to assist the Set<CachedPlayer> in knowing if a CachedPlayer is already in the set
@@ -63,15 +66,17 @@ public final class Main extends JavaPlugin implements Listener {
 		}
 	}
 
+	Metrics metrics;
+
 	FileConfiguration config = getConfig();
-	final int CONFIG_VERSION_GLOBAL = 2;
+	final int CONFIG_VERSION_GLOBAL = 3;
 	final String CONFIG_VERSION_KEY = "configVersion_DO_NOT_TOUCH";
 
 	boolean verboseLogging = true;
 	final String VERBOSE_LOGGING_KEY = "verboseLogging";
 
-	boolean useTydiumCraftSkinAPI = false;
-	final String USE_TYDIUMCRAFT_SKIN_API_KEY = "useTydiumCraftSkinAPI";
+	String customAPI = "";
+	final String CUSTOM_API_KEY = "customAPI";
 
 	long cacheHours = 3 * 24; //three days by default
 	final String CACHE_HOURS_KEY = "cacheHours";
@@ -86,7 +91,8 @@ public final class Main extends JavaPlugin implements Listener {
 		int configVersionCurrent = config.getInt(CONFIG_VERSION_KEY);  //is 0 if the config file doesn't exist
 		if(loadAll) {
 			verboseLogging = config.getBoolean(VERBOSE_LOGGING_KEY);
-			useTydiumCraftSkinAPI = config.getBoolean(USE_TYDIUMCRAFT_SKIN_API_KEY);
+			customAPI = config.getString(CUSTOM_API_KEY);
+			metrics.addCustomChart(new SimplePie("custom_api", () -> customAPI.isBlank() ? "Direct" : "Custom"));
 			cacheHours = config.getInt(CACHE_HOURS_KEY);
 		}
 		return configVersionCurrent;
@@ -96,21 +102,24 @@ public final class Main extends JavaPlugin implements Listener {
 	public void onEnable() {
 		// Plugin startup logic
 
-		Metrics metrics = new Metrics(this, 16426);
+		metrics = new Metrics(this, 16426);
 
 		//Config
 
 		int configVersionCurrent = loadConfig(false);
 
-		if(configVersionCurrent != 0 && configVersionCurrent != CONFIG_VERSION_GLOBAL ||
-				config.contains("verboseUpdateMessages")) //use config.contains to check for all old config settings
+		if(configVersionCurrent != 0 && configVersionCurrent != CONFIG_VERSION_GLOBAL
+				//use config.contains to check for all old config settings
+				|| config.contains("verboseUpdateMessages")
+				|| config.contains("useTydiumCraftSkinAPI")
+		)
 		{
 			getLogger().severe("Config is out of date, please delete the config file and restart your server to reset it!\nShutting down the plugin...");
 			Bukkit.getPluginManager().disablePlugin(this);
 		} else {
 			config.addDefault(CONFIG_VERSION_KEY, CONFIG_VERSION_GLOBAL);
 			config.addDefault(VERBOSE_LOGGING_KEY, verboseLogging);
-			config.addDefault(USE_TYDIUMCRAFT_SKIN_API_KEY, useTydiumCraftSkinAPI);
+			config.addDefault(CUSTOM_API_KEY, customAPI);
 			config.addDefault(CACHE_HOURS_KEY, cacheHours);
 
 			config.options().copyDefaults(true);
@@ -135,7 +144,6 @@ public final class Main extends JavaPlugin implements Listener {
 			playersToProcess = new HashSet<>();
 
 			BlueMapAPI.onEnable(blueMapOnEnableListener);
-
 			BlueMapAPI.onDisable(blueMapOnDisableListener);
 
 			getServer().getPluginManager().registerEvents(this, this);
@@ -167,7 +175,7 @@ public final class Main extends JavaPlugin implements Listener {
 			if (floodgateApi.isFloodgatePlayer(p.getUniqueId())) {
 				FloodgatePlayer floodgatePlayer = floodgateApi.getPlayer(p.getUniqueId());
 				String xuid = floodgatePlayer.getXuid();
-				CachedPlayer cachedPlayer = new CachedPlayer(p.getUniqueId(), xuid);
+				CachedPlayer cachedPlayer = new CachedPlayer(p.getUniqueId(), xuid, floodgatePlayer.getUsername());
 				floodgateJoin(cachedPlayer);
 			}
 		}
@@ -200,7 +208,7 @@ public final class Main extends JavaPlugin implements Listener {
 			if (floodgateApi.isFloodgatePlayer(p.getUniqueId())) {
 				FloodgatePlayer floodgatePlayer = floodgateApi.getPlayer(p.getUniqueId());
 				String xuid = floodgatePlayer.getXuid();
-				CachedPlayer cachedPlayer = new CachedPlayer(p.getUniqueId(), xuid);
+				CachedPlayer cachedPlayer = new CachedPlayer(p.getUniqueId(), xuid, floodgatePlayer.getUsername());
 
 				BlueMapAPI.getInstance().ifPresentOrElse(api -> { //BlueMap IS currently loaded
 					floodgateJoin(cachedPlayer);
@@ -257,14 +265,22 @@ public final class Main extends JavaPlugin implements Listener {
 	}
 
 	private void downloadHeadToCache(CachedPlayer cachedPlayer, File f) {
+		String placeholderUUID = "{UUID}";
+		String placeholderName = "{NAME}";
+
 		BufferedImage skin;
 
-		if (useTydiumCraftSkinAPI) {
-			verboseLog("Getting " + cachedPlayer.uuid + "'s skin from TydiumCraft's Skin API");
-			skin = imageFromURL("https://api.tydiumcraft.net/v1/players/skin?type=skin&uuid=" + cachedPlayer.uuid);
-		} else {
+		if (customAPI.isBlank()) {
 			String textureID = textureIDFromXUID(cachedPlayer.xuid);
 			skin = skinFromTextureID(textureID);
+		} else {
+			String link = customAPI.contains(placeholderUUID)
+					? customAPI.replace(placeholderUUID, cachedPlayer.uuid.toString())
+					: customAPI + cachedPlayer.uuid;
+			link = link.replace(placeholderName, cachedPlayer.name);
+
+			verboseLog("Getting " + cachedPlayer.name + "'s skin from custom Skin API: " + link);
+			skin = imageFromURL(link);
 		}
 
 		BufferedImage head;
@@ -274,7 +290,14 @@ public final class Main extends JavaPlugin implements Listener {
 					+ (verboseLogging ? "" : " Turn on verbose logging in the config to find out why, next time"));
 			head = getSteveHead();
 		} else {
-			head = headFromSkin(skin);
+			//if skin is already a head, just use that
+			if (skin.getWidth() == 8 && skin.getHeight() == 8) {
+				verboseLog("Skin was already a head");
+				head = skin;
+			} else {
+				verboseLog("Skin was not a head, cropping...");
+				head = headFromSkin(skin);
+			}
 		}
 
 		if (head == null) {

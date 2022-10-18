@@ -17,8 +17,12 @@ You can safely reload the config by reloading this plugin with [PlugManX](https:
   - Do not touch this one! It's needed internally to keep track of the config versions.
 - `verboseLogging: true`
   - Set to `true` if you want more messages telling you what the plugin is up to.
-- `useTydiumCraftSkinAPI: false`
-  - Option to choose between using the [TydiumCraft Skin API](https://tydiumcraft.net/docs/skinapi) and my own custom implementation.
+- `customAPI: ''`
+  - If you want to use a custom skin API, you can set it here. Keep empty if you want to use my own custom skin grabber.\
+    Please tell me if you do use a custom skin API, because I genuinely want to know why anyone would want to do that.
+  - Make sure the API returns a full skin image OR an 8x8 head.
+  - Available placeholders: `{UUID}`, `{NAME}`\
+    If there was no placeholder found in the URL, the UUID will be appended to the end of the URL.
 - `cacheHours: 72`
   - How long to keep the playerheads cached for. The lower this number, the faster skin updates will appear, but the more network usage there will be.
 
