@@ -30,6 +30,10 @@ You can safely reload the config by reloading this plugin with [PlugManX](https:
 
 ## [TODO list](../../projects/1?fullscreen=true)
 
+## Support
+
+To get support with this plugin, join the [BlueMap Discord server](https://bluecolo.red/map-discord) and ask your questions in [#3rd-party-support](https://discord.com/channels/665868367416131594/863844716047106068). You're welcome to ping me, @TechnicJelle.
+
 ## Special thanks to
 [Camotoy](https://github.com/Camotoy/GeyserSkinManager) for their open-source plugins that gave me great examples to learn from.\
 And [TBlueF](https://github.com/TBlueF) of course for his amazing plugin and fast support with my silly questions!
