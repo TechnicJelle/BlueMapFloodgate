@@ -1,8 +1,0 @@
-# Do not touch this one! It's needed internally to keep track of the config versions.
-configVersion_DO_NOT_TOUCH: 4
-
-# How long to keep the playerheads cached for. The lower this number, the faster skin updates will appear, but the more network usage there will be.
-cacheHours: 72
-
-# Set to true if you want more messages telling you what the plugin is up to.
-verboseLogging: false
