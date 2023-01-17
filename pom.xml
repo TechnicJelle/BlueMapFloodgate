@@ -6,7 +6,7 @@
 
 	<groupId>com.technicjelle</groupId>
 	<artifactId>BlueMapFloodgate</artifactId>
-	<version>2.0.0</version>
+	<version>3</version>
 	<packaging>jar</packaging>
 
 	<name>BlueMapFloodgate</name>
@@ -75,14 +75,6 @@
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
 		</repository>
-		<repository>
-			<id>opencollab-snapshot</id>
-			<url>https://repo.opencollab.dev/maven-snapshots/</url>
-		</repository>
-<!--		<repository>-->
-<!--			<id>opencollab-release</id>-->
-<!--			<url>https://repo.opencollab.dev/maven-releases/</url>-->
-<!--		</repository>-->
 	</repositories>
 
 	<dependencies>
@@ -96,12 +88,6 @@
 			<groupId>com.github.BlueMap-Minecraft</groupId>
 			<artifactId>BlueMapAPI</artifactId>
 			<version>v2.4.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.geysermc.floodgate</groupId>
-			<artifactId>api</artifactId>
-			<version>2.2.0-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

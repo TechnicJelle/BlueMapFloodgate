@@ -7,8 +7,6 @@ import de.bluecolored.bluemap.api.BlueMapAPI;
 import de.bluecolored.bluemap.api.plugin.SkinProvider;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,9 +21,10 @@ import java.net.URLConnection;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 public final class Main extends JavaPlugin {
-	private final boolean VERBOSE_LOGGING = false;
+	private final boolean VERBOSE_LOGGING = true;
 	private void verboseLog(String message) {
 		if (VERBOSE_LOGGING) getLogger().info(message);
 	}
@@ -41,22 +40,20 @@ public final class Main extends JavaPlugin {
 
 	private final Consumer<BlueMapAPI> blueMapOnEnableListener = blueMapAPI -> {
 		SkinProvider floodgateSkinProvider = new SkinProvider() {
-			private final FloodgateApi floodgateApi = FloodgateApi.getInstance();
 			private final SkinProvider defaultSkinProvider = blueMapAPI.getPlugin().getSkinProvider();
 
 			@Override
 			public Optional<BufferedImage> load(UUID playerUUID) throws IOException {
-				if (floodgateApi.isFloodgatePlayer(playerUUID)) {
-					FloodgatePlayer floodgatePlayer = floodgateApi.getPlayer(playerUUID);
-					String xuid = floodgatePlayer.getXuid();
+				if (isFloodgatePlayer(playerUUID)) {
+					long xuid = getXuid(playerUUID);
 					@Nullable String textureID = textureIDFromXUID(xuid);
 					if (textureID == null) {
-						verboseLog("TextureID for " + playerUUID + " is null");
+						getLogger().warning("TextureID for " + playerUUID + " is null");
 						return Optional.empty();
 					}
 					@Nullable BufferedImage skin = skinFromTextureID(textureID);
 					if (skin == null) {
-						verboseLog("Skin for " + playerUUID + " is null");
+						getLogger().warning("Skin for " + playerUUID + " is null");
 						return Optional.empty();
 					}
 					verboseLog("Skin for " + playerUUID + " successfully gotten!");
@@ -68,7 +65,6 @@ public final class Main extends JavaPlugin {
 		};
 
 		blueMapAPI.getPlugin().setSkinProvider(floodgateSkinProvider);
-
 	};
 
 	@Override
@@ -82,11 +78,19 @@ public final class Main extends JavaPlugin {
 	// ===============================================Util Methods=====================================================
 	// ================================================================================================================
 
+	private boolean isFloodgatePlayer(UUID playerUUID) {
+		return playerUUID.version() == 0;
+	}
+
+	private long getXuid(UUID playerUUID) {
+		return playerUUID.getLeastSignificantBits();
+	}
+
 	/**
 	 * @param xuid XUID of the floodgate player
 	 * @return the texture ID of the player, or null if it could not be found
 	 */
-	private @Nullable String textureIDFromXUID(@NotNull String xuid) {
+	private @Nullable String textureIDFromXUID(long xuid) {
 		try {
 			URL url = new URL("https://api.geysermc.org/v2/skin/" + xuid);
 			verboseLog("Getting textureID from " + url);
@@ -96,30 +100,29 @@ public final class Main extends JavaPlugin {
 
 				JsonObject joRoot = JsonParser.parseReader(new InputStreamReader((InputStream) request.getContent())).getAsJsonObject();
 				if (joRoot == null) {
-					verboseLog("joRoot is null!");
+					getLogger().log(Level.WARNING, "joRoot is null!");
 					return null;
 				}
 
 				JsonElement jeTextureID = joRoot.get("texture_id");
 				if (jeTextureID == null) {
-					verboseLog("jeTextureID is null!");
+					getLogger().log(Level.WARNING, "jeTextureID is null!");
 					return null;
 				}
 
 				String textureID = jeTextureID.getAsString();
 				if (textureID == null) {
-					verboseLog("textureID is null!");
+					getLogger().log(Level.WARNING, "textureID is null!");
 					return null;
 				}
 
 				return textureID;
 			} catch (IOException e) {
-				getLogger().warning("Failed to get the textureID for " + xuid + " from " + url);
-				e.printStackTrace();
+				getLogger().log(Level.WARNING, "Failed to get the textureID for " + xuid + " from " + url, e);
 				return null;
 			}
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			getLogger().log(Level.SEVERE, "Geyser API URL is malformed", e);
 			return null;
 		}
 	}
@@ -147,12 +150,11 @@ public final class Main extends JavaPlugin {
 				result = ImageIO.read(in);
 				in.close();
 			} catch (IOException e) {
-				getLogger().warning("Failed to get the image from " + url);
-				e.printStackTrace();
+				getLogger().log(Level.SEVERE, "Failed to get the image from " + url, e);
 				return null;
 			}
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			getLogger().log(Level.SEVERE, "URL is malformed: " + url, e);
 			return null;
 		}
 		return result;
