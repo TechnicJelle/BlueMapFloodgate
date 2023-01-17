@@ -33,12 +33,16 @@ public final class Main extends JavaPlugin {
 	public void onEnable() {
 		new Metrics(this, 16426);
 
+		UpdateChecker.check("TechnicJelle", "BlueMapFloodgate", getDescription().getVersion());
+
 		BlueMapAPI.onEnable(blueMapOnEnableListener);
 
 		getLogger().info("BlueMap Floodgate compatibility plugin enabled!");
 	}
 
 	private final Consumer<BlueMapAPI> blueMapOnEnableListener = blueMapAPI -> {
+		UpdateChecker.logUpdateMessage(getLogger());
+
 		SkinProvider floodgateSkinProvider = new SkinProvider() {
 			private final SkinProvider defaultSkinProvider = blueMapAPI.getPlugin().getSkinProvider();
 
