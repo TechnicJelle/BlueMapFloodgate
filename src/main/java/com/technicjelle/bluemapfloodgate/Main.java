@@ -23,13 +23,9 @@ import java.net.URLConnection;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 public final class Main extends JavaPlugin {
-	private final boolean VERBOSE_LOGGING = false;
-	private void verboseLog(String message) {
-		if (VERBOSE_LOGGING) getLogger().info(message);
-	}
-
 	@Override
 	public void onEnable() {
 		new Metrics(this, 16426);
@@ -37,6 +33,7 @@ public final class Main extends JavaPlugin {
 		BlueMapAPI.onEnable(blueMapOnEnableListener);
 
 		getLogger().info("BlueMap Floodgate compatibility plugin enabled!");
+//		getLogger().setLevel(Level.FINE);
 	}
 
 	private final Consumer<BlueMapAPI> blueMapOnEnableListener = blueMapAPI -> {
@@ -46,22 +43,25 @@ public final class Main extends JavaPlugin {
 
 			@Override
 			public Optional<BufferedImage> load(UUID playerUUID) throws IOException {
+				getLogger().log(Level.FINE, "Loading skin for " + playerUUID);
 				if (floodgateApi.isFloodgatePlayer(playerUUID)) {
+					getLogger().log(Level.FINE, "Player is a Floodgate player");
 					FloodgatePlayer floodgatePlayer = floodgateApi.getPlayer(playerUUID);
 					String xuid = floodgatePlayer.getXuid();
 					@Nullable String textureID = textureIDFromXUID(xuid);
 					if (textureID == null) {
-						verboseLog("TextureID for " + playerUUID + " is null");
+						getLogger().log(Level.FINE, "TextureID for " + playerUUID + " is null");
 						return Optional.empty();
 					}
 					@Nullable BufferedImage skin = skinFromTextureID(textureID);
 					if (skin == null) {
-						verboseLog("Skin for " + playerUUID + " is null");
+						getLogger().log(Level.FINE, "Skin for " + playerUUID + " is null");
 						return Optional.empty();
 					}
-					verboseLog("Skin for " + playerUUID + " successfully gotten!");
+					getLogger().log(Level.FINE, "Skin for " + playerUUID + " successfully gotten!");
 					return Optional.of(skin);
 				} else {
+					getLogger().log(Level.FINE, "Player is not a Floodgate player");
 					return defaultSkinProvider.load(playerUUID);
 				}
 			}
@@ -89,37 +89,36 @@ public final class Main extends JavaPlugin {
 	private @Nullable String textureIDFromXUID(@NotNull String xuid) {
 		try {
 			URL url = new URL("https://api.geysermc.org/v2/skin/" + xuid);
-			verboseLog("Getting textureID from " + url);
+			getLogger().log(Level.FINE, "Getting textureID from " + url);
 			try {
 				URLConnection request = url.openConnection();
 				request.connect();
 
 				JsonObject joRoot = JsonParser.parseReader(new InputStreamReader((InputStream) request.getContent())).getAsJsonObject();
 				if (joRoot == null) {
-					verboseLog("joRoot is null!");
+					getLogger().log(Level.WARNING, "joRoot is null!");
 					return null;
 				}
 
 				JsonElement jeTextureID = joRoot.get("texture_id");
 				if (jeTextureID == null) {
-					verboseLog("jeTextureID is null!");
+					getLogger().log(Level.WARNING, "jeTextureID is null!");
 					return null;
 				}
 
 				String textureID = jeTextureID.getAsString();
 				if (textureID == null) {
-					verboseLog("textureID is null!");
+					getLogger().log(Level.WARNING, "textureID is null!");
 					return null;
 				}
 
 				return textureID;
 			} catch (IOException e) {
-				getLogger().warning("Failed to get the textureID for " + xuid + " from " + url);
-				e.printStackTrace();
+				getLogger().log(Level.WARNING, "Failed to get the textureID for " + xuid + " from " + url, e);
 				return null;
 			}
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			getLogger().log(Level.SEVERE, "Geyser API URL is malformed", e);
 			return null;
 		}
 	}
@@ -129,7 +128,7 @@ public final class Main extends JavaPlugin {
 	 * @return the skin of the player, or null if it could not be found
 	 */
 	private @Nullable BufferedImage skinFromTextureID(@NotNull String textureID) {
-		verboseLog("Getting skin from textureID: " + textureID);
+		getLogger().log(Level.FINE, "Getting skin from textureID: " + textureID);
 		return imageFromURL("https://textures.minecraft.net/texture/" + textureID);
 	}
 
@@ -141,18 +140,17 @@ public final class Main extends JavaPlugin {
 		BufferedImage result;
 		try {
 			URL imageUrl = new URL(url);
-			verboseLog("Getting image from URL: " + url);
+			getLogger().log(Level.FINE, "Getting image from URL: " + url);
 			try {
 				InputStream in = imageUrl.openStream();
 				result = ImageIO.read(in);
 				in.close();
 			} catch (IOException e) {
-				getLogger().warning("Failed to get the image from " + url);
-				e.printStackTrace();
+				getLogger().log(Level.SEVERE, "Failed to get the image from " + url, e);
 				return null;
 			}
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			getLogger().log(Level.SEVERE, "URL is malformed: " + url, e);
 			return null;
 		}
 		return result;
