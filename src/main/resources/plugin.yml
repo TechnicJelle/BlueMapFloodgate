@@ -2,6 +2,7 @@ name: BlueMapFloodgate
 version: ${project.version}
 main: com.technicjelle.bluemapfloodgate.Main
 api-version: 1.17
+folia-supported: true
 depend:
   - BlueMap
   - floodgate
