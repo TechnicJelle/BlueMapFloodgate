@@ -36,12 +36,8 @@ public final class BlueMapFloodgate extends JavaPlugin {
 	public void onEnable() {
 		new Metrics(this, 16426);
 
-		try {
-			updateChecker = new UpdateChecker("TechnicJelle", "BlueMapFloodgate", getDescription().getVersion());
-			updateChecker.checkAsync();
-		} catch (MalformedURLException e) {
-			throw new RuntimeException(e);
-		}
+		updateChecker = new UpdateChecker("TechnicJelle", "BlueMapFloodgate", getDescription().getVersion());
+		updateChecker.checkAsync();
 
 		BlueMapAPI.onEnable(blueMapOnEnableListener);
 
