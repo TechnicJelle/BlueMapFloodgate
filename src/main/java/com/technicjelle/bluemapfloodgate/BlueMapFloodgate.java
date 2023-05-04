@@ -3,6 +3,7 @@ package com.technicjelle.bluemapfloodgate;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.technicjelle.UpdateChecker;
 import de.bluecolored.bluemap.api.BlueMapAPI;
 import de.bluecolored.bluemap.api.plugin.SkinProvider;
 import org.bstats.bukkit.Metrics;
@@ -23,7 +24,9 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
-public final class Main extends JavaPlugin {
+public final class BlueMapFloodgate extends JavaPlugin {
+	UpdateChecker updateChecker;
+
 	private final boolean VERBOSE_LOGGING = true;
 	private void verboseLog(String message) {
 		if (VERBOSE_LOGGING) getLogger().info(message);
@@ -33,7 +36,12 @@ public final class Main extends JavaPlugin {
 	public void onEnable() {
 		new Metrics(this, 16426);
 
-		UpdateChecker.check("TechnicJelle", "BlueMapFloodgate", getDescription().getVersion());
+		try {
+			updateChecker = new UpdateChecker("TechnicJelle", "BlueMapFloodgate", getDescription().getVersion());
+			updateChecker.checkAsync();
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e);
+		}
 
 		BlueMapAPI.onEnable(blueMapOnEnableListener);
 
@@ -41,7 +49,7 @@ public final class Main extends JavaPlugin {
 	}
 
 	private final Consumer<BlueMapAPI> blueMapOnEnableListener = blueMapAPI -> {
-		UpdateChecker.logUpdateMessage(getLogger());
+		updateChecker.logUpdateMessage(getLogger());
 
 		SkinProvider floodgateSkinProvider = new SkinProvider() {
 			private final SkinProvider defaultSkinProvider = blueMapAPI.getPlugin().getSkinProvider();
