@@ -3,6 +3,7 @@ package com.technicjelle.bluemapfloodgate;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.technicjelle.MCUtils;
 import com.technicjelle.UpdateChecker;
 import de.bluecolored.bluemap.api.BlueMapAPI;
 import de.bluecolored.bluemap.api.plugin.SkinProvider;
@@ -11,7 +12,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -140,31 +140,7 @@ public final class BlueMapFloodgate extends JavaPlugin {
 	 * @return the skin of the player, or null if it could not be found
 	 */
 	private @Nullable BufferedImage skinFromTextureID(@NotNull String textureID) {
-		verboseLog("Getting skin from textureID: " + textureID);
-		return imageFromURL("https://textures.minecraft.net/texture/" + textureID);
-	}
-
-	/**
-	 * @param url URL of the image
-	 * @return the image, or null if it could not be found
-	 */
-	private @Nullable BufferedImage imageFromURL(@NotNull String url) {
-		BufferedImage result;
-		try {
-			URL imageUrl = new URL(url);
-			verboseLog("Getting image from URL: " + url);
-			try {
-				InputStream in = imageUrl.openStream();
-				result = ImageIO.read(in);
-				in.close();
-			} catch (IOException e) {
-				getLogger().log(Level.SEVERE, "Failed to get the image from " + url, e);
-				return null;
-			}
-		} catch (MalformedURLException e) {
-			getLogger().log(Level.SEVERE, "URL is malformed: " + url, e);
-			return null;
-		}
-		return result;
+		verboseLog("Downloading skin with textureID: " + textureID);
+		return MCUtils.downloadImage("https://textures.minecraft.net/texture/" + textureID);
 	}
 }
