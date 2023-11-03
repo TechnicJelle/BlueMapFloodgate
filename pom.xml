@@ -6,7 +6,7 @@
 
 	<groupId>com.technicjelle</groupId>
 	<artifactId>BlueMapFloodgate</artifactId>
-	<version>3.1</version>
+	<version>3.2</version>
 	<packaging>jar</packaging>
 
 	<name>BlueMapFloodgate</name>
@@ -81,7 +81,7 @@
 		<dependency>
 			<groupId>com.github.TechnicJelle</groupId>
 			<artifactId>UpdateCheckerJava</artifactId>
-			<version>v2.2</version>
+			<version>v2.3</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
