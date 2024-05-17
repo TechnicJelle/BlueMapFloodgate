@@ -16,24 +16,17 @@ repositories {
     }
 
     maven {
-        url = uri('https://oss.sonatype.org/content/groups/public/')
-    }
-
-    maven {
         url = uri('https://jitpack.io')
-    }
-
-    maven {
-        url = uri('https://repo.maven.apache.org/maven2/')
     }
 }
 
 dependencies {
-    api libs.com.github.technicjelle.updatecheckerjava
-    api libs.com.github.technicjelle.mcutils
-    api libs.org.bstats.bstats.bukkit
-    compileOnly libs.io.papermc.paper.paper.api
-    compileOnly libs.com.github.bluemap.minecraft.bluemapapi
+    api "com.github.TechnicJelle:MCUtils:${project.mcutils_version}"
+    api "com.github.TechnicJelle:UpdateCheckerJava:${project.updatecheckerjava_version}"
+    api "org.bstats:bstats-bukkit:${project.bukkit_version}"
+
+    compileOnly "io.papermc.paper:paper-api:${project.paper_version}"
+    compileOnly "com.github.BlueMap-Minecraft:BlueMapAPI:${project.blue_map_version}"
 }
 
 tasks.withType(JavaCompile).configureEach {
