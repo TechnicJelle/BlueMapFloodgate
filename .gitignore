@@ -5,8 +5,11 @@
 *.ipr
 *.iws
 
-# IntelliJ
+# Gradle
+.gradle/
+build/
 out/
+classes/
 
 # Compiled class file
 *.class

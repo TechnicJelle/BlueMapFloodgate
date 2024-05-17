@@ -1,0 +1,54 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+version = project.version
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+repositories {
+    maven {
+        url = uri('https://papermc.io/repo/repository/maven-public/')
+    }
+
+    maven {
+        url = uri('https://oss.sonatype.org/content/groups/public/')
+    }
+
+    maven {
+        url = uri('https://jitpack.io')
+    }
+
+    maven {
+        url = uri('https://repo.maven.apache.org/maven2/')
+    }
+}
+
+dependencies {
+    api libs.com.github.technicjelle.updatecheckerjava
+    api libs.com.github.technicjelle.mcutils
+    api libs.org.bstats.bstats.bukkit
+    compileOnly libs.io.papermc.paper.paper.api
+    compileOnly libs.com.github.bluemap.minecraft.bluemapapi
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 17
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from(components.java)
+        }
+    }
+}
