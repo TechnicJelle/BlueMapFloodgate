@@ -1,0 +1,44 @@
+plugins {
+    id 'java-library'
+}
+
+version = project.version
+group = project.maven_group
+
+base {
+    archivesName = "${project.archives_base_name}-paper-${project.paper_project_version}"
+}
+
+repositories {
+    maven {
+        url = uri('https://papermc.io/repo/repository/maven-public/')
+    }
+
+    maven {
+        url = uri('https://jitpack.io')
+    }
+}
+
+dependencies {
+    api "com.github.TechnicJelle:MCUtils:${project.mcutils_version}"
+    api "com.github.TechnicJelle:UpdateCheckerJava:${project.updatecheckerjava_version}"
+    api "org.bstats:bstats-bukkit:${project.bukkit_version}"
+
+    api "io.papermc.paper:paper-api:${project.paper_version}"
+    api "com.github.BlueMap-Minecraft:BlueMapAPI:${project.blue_map_version}"
+}
+
+tasks.withType(JavaCompile).configureEach {
+    // Minecraft <=1.20.4 uses Java 17
+    // Minecraft >=1.20.5 requires Java 21
+    it.options.release = 21
+}
+
+java {
+    withSourcesJar()
+
+    // Minecraft <=1.20.4 uses Java 17
+    // Minecraft >=1.20.5 requires Java 21
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}

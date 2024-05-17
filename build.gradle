@@ -1,47 +1,5 @@
 plugins {
-    id 'java-library'
     id 'maven-publish'
-}
 
-version = project.version
-group = project.maven_group
-
-base {
-    archivesName = project.archives_base_name
-}
-
-repositories {
-    maven {
-        url = uri('https://papermc.io/repo/repository/maven-public/')
-    }
-
-    maven {
-        url = uri('https://jitpack.io')
-    }
-}
-
-dependencies {
-    api "com.github.TechnicJelle:MCUtils:${project.mcutils_version}"
-    api "com.github.TechnicJelle:UpdateCheckerJava:${project.updatecheckerjava_version}"
-    api "org.bstats:bstats-bukkit:${project.bukkit_version}"
-
-    compileOnly "io.papermc.paper:paper-api:${project.paper_version}"
-    compileOnly "com.github.BlueMap-Minecraft:BlueMapAPI:${project.blue_map_version}"
-}
-
-tasks.withType(JavaCompile).configureEach {
-    it.options.release = 17
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from(components.java)
-        }
-    }
+    id 'fabric-loom' version '1.6-SNAPSHOT' apply false
 }

@@ -1,0 +1,32 @@
+{
+	"schemaVersion": 1,
+	"id": "blue-map-floodgate",
+	"version": "${version}",
+	"name": "Blue Map Floodgate",
+	"description": "Correct the player head image on BlueMap when floodgate players are connected to the server!",
+	"authors": [
+		"TechnicJelle",
+		"ShadowHunter22"
+	],
+	"contact": {
+		"sources": "https://github.com/TechnicJelle/BlueMapFloodgate"
+	},
+	"license": "Mozilla Public License 2.0",
+	"icon": "assets/blue-map-floodgate/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.technicjelle.bluemapfloodgate.BlueMapFloodgate"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.15.11",
+		"minecraft": ">=1.20.6",
+		"java": ">=21",
+		"fabric-api": "*",
+		"bluemap": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
