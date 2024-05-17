@@ -2,7 +2,7 @@
 [![GitHub Total Downloads](https://img.shields.io/github/downloads/TechnicJelle/BlueMapFloodgate/total?label=Downloads&color=success "Click here to download the plugin")](https://github.com/TechnicJelle/BlueMapFloodgate/releases/latest)
 [![Servers using this plugin](https://img.shields.io/bstats/servers/16426?label=Servers)](https://bstats.org/plugin/bukkit/BlueMap%20Floodgate/16426)
 
-A Minecraft Paper plugin and [BlueMap](https://github.com/BlueMap-Minecraft/BlueMap) addon that adds [Geyser/Floodgate](https://github.com/GeyserMC/Floodgate) support:
+A Minecraft Paper plugin, Fabric mod, and [BlueMap](https://github.com/BlueMap-Minecraft/BlueMap) addon that adds [Geyser/Floodgate](https://github.com/GeyserMC/Floodgate) support:
 by default, floodgate players don't have the correct playerhead image on BlueMap. This plugin fixes that.
 
 | Without                                                  | With                                               |

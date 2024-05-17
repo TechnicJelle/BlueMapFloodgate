@@ -1,7 +1,6 @@
-# This workflow will build a Java project with Maven
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+# This workflow will build a Java project with Gradle
 
-name: Java CI with Maven
+name: Java CI with Gradle
 
 on:
   workflow_dispatch:
@@ -12,27 +11,30 @@ on:
 
 jobs:
   build:
-
+    strategy:
+      matrix:
+        # Use these Java versions
+        java: [
+          21
+        ]
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v3.1.0
-    - name: Set up JDK 16
-      uses: actions/setup-java@v3.6.0
-      with:
-        java-version: '16'
-        distribution: 'temurin'
-    - name: Cache
-      uses: actions/cache@v3.0.11
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v3.1.0
-      with:
-        # A file, directory or wildcard pattern that describes what to upload
-        path: /home/runner/work/BlueMapFloodgate/BlueMapFloodgate/target/*
+      - name: checkout repository
+        uses: actions/checkout@v4
+      - name: validate gradle wrapper
+        uses: gradle/wrapper-validation-action@v2
+      - name: setup jdk ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'microsoft'
+      - name: make gradle wrapper executable
+        run: chmod +x ./gradlew
+      - name: build
+        run: ./gradlew build
+      - name: capture build artifacts
+        if: ${{ matrix.java == '21' }} # Only upload artifacts built from latest java
+        uses: actions/upload-artifact@v4
+        with:
+          name: Artifacts
+          path: build/libs/

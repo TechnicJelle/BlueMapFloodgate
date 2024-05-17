@@ -5,8 +5,11 @@
 *.ipr
 *.iws
 
-# IntelliJ
+# Gradle
+.gradle/
+build/
 out/
+classes/
 
 # Compiled class file
 *.class
@@ -18,7 +21,6 @@ out/
 *.ctxt
 
 # Package Files #
-*.jar
 *.war
 *.nar
 *.ear
