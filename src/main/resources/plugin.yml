@@ -5,6 +5,7 @@ api-version: 1.17
 folia-supported: true
 depend:
   - BlueMap
+softdepend:
   - floodgate
 author: TechnicJelle
 description: ${project.description}
