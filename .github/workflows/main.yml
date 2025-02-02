@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 16
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '16'
+          java-version: '21'
           distribution: 'temurin'
       - name: Build with Maven
         run: mvn -B package --file pom.xml

@@ -3,7 +3,7 @@ package com.technicjelle.bluemapfloodgate;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.technicjelle.MCUtils;
+import com.technicjelle.MCUtils.ImageUtils;
 import com.technicjelle.UpdateChecker;
 import de.bluecolored.bluemap.api.BlueMapAPI;
 import de.bluecolored.bluemap.api.plugin.SkinProvider;
@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Optional;
@@ -27,7 +29,7 @@ import java.util.logging.Level;
 public final class BlueMapFloodgate extends JavaPlugin {
 	UpdateChecker updateChecker;
 
-	private final boolean VERBOSE_LOGGING = true;
+	private final boolean VERBOSE_LOGGING = false;
 	private void verboseLog(String message) {
 		if (VERBOSE_LOGGING) getLogger().info(message);
 	}
@@ -100,7 +102,7 @@ public final class BlueMapFloodgate extends JavaPlugin {
 	 */
 	private @Nullable String textureIDFromXUID(long xuid) {
 		try {
-			URL url = new URL("https://api.geysermc.org/v2/skin/" + xuid);
+			URL url = new URI("https://api.geysermc.org/v2/skin/" + xuid).toURL();
 			verboseLog("Getting textureID from " + url);
 			try {
 				URLConnection request = url.openConnection();
@@ -129,7 +131,7 @@ public final class BlueMapFloodgate extends JavaPlugin {
 				getLogger().log(Level.WARNING, "Failed to get the textureID for " + xuid + " from " + url, e);
 				return null;
 			}
-		} catch (MalformedURLException e) {
+		} catch (MalformedURLException | URISyntaxException e) {
 			getLogger().log(Level.SEVERE, "Geyser API URL is malformed", e);
 			return null;
 		}
@@ -141,6 +143,6 @@ public final class BlueMapFloodgate extends JavaPlugin {
 	 */
 	private @Nullable BufferedImage skinFromTextureID(@NotNull String textureID) {
 		verboseLog("Downloading skin with textureID: " + textureID);
-		return MCUtils.downloadImage("https://textures.minecraft.net/texture/" + textureID);
+		return ImageUtils.downloadImage("https://textures.minecraft.net/texture/" + textureID);
 	}
 }
