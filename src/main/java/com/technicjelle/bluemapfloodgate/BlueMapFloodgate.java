@@ -61,7 +61,7 @@ public final class BlueMapFloodgate extends JavaPlugin {
 						getLogger().warning("Skin for " + playerUUID + " is null");
 						return Optional.empty();
 					}
-					getLogger().debug("Skin for " + playerUUID + " successfully retrieved!");
+					getLogger().log(Level.DEBUG, "Skin for " + playerUUID + " successfully retrieved!");
 					return Optional.of(skin);
 				} else {
 					return defaultSkinProvider.load(playerUUID);
@@ -98,7 +98,7 @@ public final class BlueMapFloodgate extends JavaPlugin {
 	private @Nullable String textureIDFromXUID(long xuid) {
 		try {
 			URL url = new URI("https://api.geysermc.org/v2/skin/" + xuid).toURL();
-			getLogger().debug("Getting textureID from " + url);
+			getLogger().log(Level.DEBUG, "Getting textureID from " + url);
 			try {
 				URLConnection request = url.openConnection();
 				request.connect();
@@ -138,7 +138,7 @@ public final class BlueMapFloodgate extends JavaPlugin {
 	 */
 	private @Nullable BufferedImage skinFromTextureID(@NotNull String textureID) {
 		URL url = new URI("https://textures.minecraft.net/texture/" + textureID).toURL();
-		getLogger().debug("Downloading skin from: " + url);
+		getLogger().log(Level.DEBUG, "Downloading skin from: " + url);
 		return ImageUtils.downloadImage(url);
 	}
 }
