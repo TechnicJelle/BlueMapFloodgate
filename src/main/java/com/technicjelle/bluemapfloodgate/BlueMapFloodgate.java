@@ -29,11 +29,6 @@ import java.util.logging.Level;
 public final class BlueMapFloodgate extends JavaPlugin {
 	UpdateChecker updateChecker;
 
-	private final boolean VERBOSE_LOGGING = false;
-	private void verboseLog(String message) {
-		if (VERBOSE_LOGGING) getLogger().info(message);
-	}
-
 	@Override
 	public void onEnable() {
 		new Metrics(this, 16426);
@@ -58,7 +53,7 @@ public final class BlueMapFloodgate extends JavaPlugin {
 					long xuid = getXuid(playerUUID);
 					@Nullable String textureID = textureIDFromXUID(xuid);
 					if (textureID == null) {
-						getLogger().warning("TextureID for " + playerUUID + " is null");
+						getLogger().warning("textureID for " + playerUUID + " is null");
 						return Optional.empty();
 					}
 					@Nullable BufferedImage skin = skinFromTextureID(textureID);
@@ -66,7 +61,7 @@ public final class BlueMapFloodgate extends JavaPlugin {
 						getLogger().warning("Skin for " + playerUUID + " is null");
 						return Optional.empty();
 					}
-					verboseLog("Skin for " + playerUUID + " successfully gotten!");
+					getLogger().debug("Skin for " + playerUUID + " successfully retrieved!");
 					return Optional.of(skin);
 				} else {
 					return defaultSkinProvider.load(playerUUID);
@@ -103,7 +98,7 @@ public final class BlueMapFloodgate extends JavaPlugin {
 	private @Nullable String textureIDFromXUID(long xuid) {
 		try {
 			URL url = new URI("https://api.geysermc.org/v2/skin/" + xuid).toURL();
-			verboseLog("Getting textureID from " + url);
+			getLogger().debug("Getting textureID from " + url);
 			try {
 				URLConnection request = url.openConnection();
 				request.connect();
@@ -142,7 +137,8 @@ public final class BlueMapFloodgate extends JavaPlugin {
 	 * @return the skin of the player, or null if it could not be found
 	 */
 	private @Nullable BufferedImage skinFromTextureID(@NotNull String textureID) {
-		verboseLog("Downloading skin with textureID: " + textureID);
-		return ImageUtils.downloadImage("https://textures.minecraft.net/texture/" + textureID);
+		URL url = new URI("https://textures.minecraft.net/texture/" + textureID).toURL();
+		getLogger().debug("Downloading skin from: " + url);
+		return ImageUtils.downloadImage(url);
 	}
 }
