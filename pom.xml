@@ -6,7 +6,7 @@
 
 	<groupId>com.technicjelle</groupId>
 	<artifactId>BlueMapFloodgate</artifactId>
-	<version>3.5</version>
+	<version>4.0-BETA</version>
 	<packaging>jar</packaging>
 
 	<name>BlueMapFloodgate</name>
@@ -23,29 +23,23 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.13.0</version>
+				<version>3.14.0</version>
 				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
+					<release>${java.version}</release>
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 				<version>3.6.0</version>
 				<configuration>
 					<relocations>
 						<relocation>
+							<pattern>com.technicjelle.BMUtils</pattern>
+							<shadedPattern>${project.groupId}.${project.artifactId}.shadow.BMUtils</shadedPattern>
+						</relocation>
+						<relocation>
 							<pattern>com.technicjelle.UpdateChecker</pattern>
-							<shadedPattern>com.technicjelle.bluemapfloodgate.shadow.UpdateChecker</shadedPattern>
-						</relocation>
-						<relocation>
-							<pattern>com.technicjelle.MCUtils</pattern>
-							<shadedPattern>com.technicjelle.bluemapfloodgate.shadow.MCUtils</shadedPattern>
-						</relocation>
-						<relocation>
-							<pattern>org.bstats</pattern>
-							<shadedPattern>com.technicjelle.bluemapfloodgate.shadow.bstats</shadedPattern>
+							<shadedPattern>${project.groupId}.${project.artifactId}.shadow.UpdateChecker</shadedPattern>
 						</relocation>
 					</relocations>
 				</configuration>
@@ -56,7 +50,19 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
+							<filters>
+								<filter>
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>META-INF/*.SF</exclude>
+										<exclude>META-INF/*.DSA</exclude>
+										<exclude>META-INF/*.RSA</exclude>
+										<exclude>META-INF/MANIFEST.MF</exclude>
+									</excludes>
+								</filter>
+							</filters>
 							<createDependencyReducedPom>false</createDependencyReducedPom>
+							<minimizeJar>true</minimizeJar>
 						</configuration>
 					</execution>
 				</executions>
@@ -66,19 +72,18 @@
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
+				<includes>
+					<include>**/*.addon.json</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
 			</resource>
 		</resources>
 	</build>
 
 	<repositories>
-		<repository>
-			<id>papermc</id>
-			<url>https://repo.papermc.io/repository/maven-public/</url>
-		</repository>
-		<repository>
-			<id>sonatype</id>
-			<url>https://oss.sonatype.org/content/groups/public/</url>
-		</repository>
 		<repository>
 			<id>bluecolored-releases</id>
 			<name>BlueColored Repository</name>
@@ -94,27 +99,21 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.technicjelle</groupId>
-			<artifactId>MCUtils</artifactId>
-			<version>2.0</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.papermc.paper</groupId>
-			<artifactId>paper-api</artifactId>
-			<version>1.17.1-R0.1-SNAPSHOT</version>
+			<groupId>de.bluecolored</groupId>
+			<artifactId>bluemap-common</artifactId>
+			<version>5.7</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>de.bluecolored</groupId>
 			<artifactId>bluemap-api</artifactId>
-			<version>2.7.3</version>
+			<version>2.7.4</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.bstats</groupId>
-			<artifactId>bstats-bukkit</artifactId>
-			<version>3.1.0</version>
+			<groupId>com.technicjelle</groupId>
+			<artifactId>BMUtils</artifactId>
+			<version>4.3.1</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>

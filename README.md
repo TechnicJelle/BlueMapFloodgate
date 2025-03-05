@@ -1,13 +1,17 @@
 # BlueMap Floodgate
-[![GitHub Total Downloads](https://img.shields.io/github/downloads/TechnicJelle/BlueMapFloodgate/total?label=Downloads&color=success "Click here to download the plugin")](https://github.com/TechnicJelle/BlueMapFloodgate/releases/latest)
-[![Servers using this plugin](https://img.shields.io/bstats/servers/16426?label=Servers)](https://bstats.org/plugin/bukkit/BlueMap%20Floodgate/16426)
 
-A Minecraft Paper plugin and [BlueMap](https://github.com/BlueMap-Minecraft/BlueMap) addon that adds [Geyser/Floodgate](https://github.com/GeyserMC/Floodgate) support:
-by default, floodgate players don't have the correct playerhead image on BlueMap. This plugin fixes that.
+[![GitHub Total Downloads](https://img.shields.io/github/downloads/TechnicJelle/BlueMapFloodgate/total?label=Downloads&color=success "Click here to download the plugin")](https://github.com/TechnicJelle/BlueMapFloodgate/releases/latest)
+
+A [BlueMap](https://github.com/BlueMap-Minecraft/BlueMap) addon that adds [Geyser/Floodgate](https://github.com/GeyserMC/Floodgate) support:
+by default, Floodgate players don't have the correct playerhead image on BlueMap. This plugin fixes that.
 
 | Without                                                  | With                                               |
 |----------------------------------------------------------|----------------------------------------------------|
 | ![without the plugin](.github/readme_assets/without.png) | ![with the plugin](.github/readme_assets/with.png) |
+
+This is a Native BlueMap Addon, so it should be compatible with
+all platforms that BlueMap supports!\
+Just put the `.jar` file in BlueMap's `packs/` directory, and it should work out of the box.
 
 ## [Click here to download!](../../releases/latest)
 
